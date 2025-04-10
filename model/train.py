@@ -40,15 +40,15 @@ y_train = tf.one_hot(np.loadtxt(os.path.join(train_path, "y_train.txt")) - 1, de
 x_test = extract_features(os.path.join(test_path, "Inertial Signals"))
 y_test = tf.one_hot(np.loadtxt(os.path.join(test_path, "y_test.txt")) - 1, depth=6)
 
-print("\nTraining Set:")
-print(f"x_train: {x_train.shape}")
-print(f"y_train: {y_train.shape}\n")
+# print("\nTraining Set:")
+# print(f"x_train: {x_train.shape}")
+# print(f"y_train: {y_train.shape}\n")
 
-print("Test Set:")
-print(f"x_test: {x_test.shape}")
-print(f"y_test: {y_test.shape}\n")
+# print("Test Set:")
+# print(f"x_test: {x_test.shape}")
+# print(f"y_test: {y_test.shape}\n")
 
-print(f"TensorFlow version: {tf.__version__}\n")
+# print(f"TensorFlow version: {tf.__version__}\n")
 
 # Make model folder
 if not os.path.isdir("model"):
@@ -63,25 +63,26 @@ model = models.Sequential([
     layers.Dense(6, activation="softmax")
 ])
 
+# Train the model
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 history = model.fit(x_train, y_train, epochs=30, batch_size=32, validation_data=(x_test, y_test))
 model.save(os.path.join("model", "model.keras"))
 
+# Plot model's accuracy and loss over epochs
 plt.subplot(1, 2, 1)
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
 plt.legend(['train', 'test'], loc='upper left')
 
-# summarize history for loss
 plt.subplot(1, 2, 2)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
 plt.legend(['train', 'test'], loc='upper left')
 
 plt.show()
