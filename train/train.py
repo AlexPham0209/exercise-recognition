@@ -2,6 +2,7 @@ import requests, zipfile, io, os, pickle
 import numpy as np
 import tensorflow as tf
 from keras import layers, models
+import matplotlib.pyplot as plt
 
 URL = "https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip"
 DATA_PATH = os.path.join("dataset", "uci_har")
@@ -53,6 +54,7 @@ print(f"TensorFlow version: {tf.__version__}\n")
 if not os.path.isdir("model"):
     os.mkdir("model")
 
+# Make the model
 model = models.Sequential([
     layers.Input((x_train.shape[1], x_train.shape[2])),
     layers.LSTM(64),
@@ -62,7 +64,25 @@ model = models.Sequential([
 ])
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-history = model.fit(x_train, y_train, epochs=100, batch_size=32, validation_data=(x_test, y_test))
+history = model.fit(x_train, y_train, epochs=30, batch_size=32, validation_data=(x_test, y_test))
+model.save(os.path.join("model", "model.keras"))
 
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
 
+# summarize history for loss
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+
+plt.show()
 
