@@ -1,5 +1,0 @@
-new_model = keras.models.load_model("model_data/best2.keras")
-# new_model.summary()
-# loss, acc = new_model.evaluate(x_test, y_test)
-# print(f"Loss: {loss:.4f}\nAccuracy: {acc * 100:.2f}%")
-# quit()
