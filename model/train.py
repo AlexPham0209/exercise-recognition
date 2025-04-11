@@ -57,12 +57,6 @@ callback = callbacks.ModelCheckpoint(
     verbose=1
 )
 
-new_model = keras.models.load_model("model_data/best.keras")
-new_model.summary()
-loss, acc = new_model.evaluate(x_test, y_test)
-print(f"Loss: {loss:.4f}\nAccuracy: {acc * 100:.2f}%")
-quit()
-
 # Making the model
 model = models.Sequential([
     layers.Input((x_train.shape[1], x_train.shape[2])),
