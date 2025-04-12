@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 URL = "https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip"
 DATA_PATH = os.path.join("dataset", "uci_har")
-EPOCHS = 200
+EPOCHS = 1000
 
 # Extracting features from the dataset
 def extract_features(path): 
@@ -50,7 +50,7 @@ if not os.path.isdir("model_data"):
     os.mkdir("model_data")
 
 callback = callbacks.ModelCheckpoint(
-    filepath=os.path.join("model_data", "best.keras"),
+    filepath=os.path.join("model_data", "best_smaller.keras"),
     monitor="val_accuracy",
     mode="max",
     save_best_only=True,
@@ -77,7 +77,7 @@ model = models.Sequential([
 
     layers.Flatten(),
 
-    layers.Dense(256),
+    layers.Dense(64),
     layers.BatchNormalization(),
     layers.ReLU(),
     layers.Dropout(rate=0.5),
@@ -87,8 +87,13 @@ model = models.Sequential([
 
 model.summary()
 
+model = keras.models.load_model("model_data/best_smaller.keras")
+model.evaluate(x_train, y_train)
+quit()
+
 # Training the model
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
 history = model.fit(x_train, y_train, epochs=EPOCHS, batch_size=64, validation_data=(x_valid, y_valid), callbacks=callback)
 loss, acc = model.evaluate(x_test, y_test, verbose=1)
 print(f"Loss: {loss : .4f}\nAccuracy: {acc * 100 : .2f}%")
