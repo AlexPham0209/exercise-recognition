@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 URL = "https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip"
 DATA_PATH = os.path.join("dataset", "uci_har")
-EPOCHS = 50
+EPOCHS = 200
 
 # Extracting features from the dataset
 def extract_features(path): 
@@ -50,7 +50,7 @@ if not os.path.isdir("model_data"):
     os.mkdir("model_data")
 
 callback = callbacks.ModelCheckpoint(
-    filepath=os.path.join("model_data", "best2.keras"),
+    filepath=os.path.join("model_data", "best.keras"),
     monitor="val_accuracy",
     mode="max",
     save_best_only=True,
@@ -60,19 +60,28 @@ callback = callbacks.ModelCheckpoint(
 # Making the model
 model = models.Sequential([
     layers.Input((x_train.shape[1], x_train.shape[2])),
-    layers.Conv1D(128, kernel_size=3, activation="relu", padding="causal"),
-    layers.Conv1D(64, kernel_size=3, activation="relu",padding="causal"),
+    layers.Conv1D(32, kernel_size=3),
     layers.BatchNormalization(),
-
+    layers.ReLU(),
     layers.MaxPooling1D(),
-    layers.Dropout(rate=0.5),
 
-    layers.Bidirectional(layers.LSTM(64, return_sequences=True)),
-    layers.Bidirectional(layers.LSTM(64, return_sequences=False)),
-    layers.Dropout(rate=0.5),
-
-    layers.Dense(128, activation="relu"),
+    layers.Conv1D(64, kernel_size=3),
     layers.BatchNormalization(),
+    layers.ReLU(),
+    layers.MaxPooling1D(),
+
+    layers.Conv1D(128, kernel_size=3),
+    layers.BatchNormalization(),
+    layers.ReLU(),
+    layers.MaxPooling1D(),
+
+    layers.Flatten(),
+
+    layers.Dense(256),
+    layers.BatchNormalization(),
+    layers.ReLU(),
+    layers.Dropout(rate=0.5),
+
     layers.Dense(6, activation="softmax")
 ])
 
