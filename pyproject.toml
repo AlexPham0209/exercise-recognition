@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ['src']
+
+[project]
+name = "human-activity-recognition"
+description = "Model used to detect human activity using gyroscopic and accelerometer data"
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "tensorflow>=2.19.0",
+    "keras>=3.9.2",
+    "numpy>=2.1.3",
+    "matplotlib>=3.10.1",
+    "scikit-learn>=1.6.1"
+]

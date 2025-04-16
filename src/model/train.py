@@ -5,44 +5,10 @@ import keras
 from keras import layers, models, callbacks
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from src.features import *
 
-URL = "https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip"
-DATA_PATH = os.path.join("dataset", "uci_har")
 EPOCHS = 1000
-
-# Extracting features from the dataset
-def extract_features(path): 
-    res = []
-    for name in os.listdir(path):
-        feature = np.loadtxt(os.path.join(path, name))
-        res.append(feature)
-    
-    return np.stack(res, axis=-1)
-        
-# Check if the UCI Har dataset exists
-if not os.path.isdir(DATA_PATH):
-    # Download Human Activity Recognition dataset 
-    print("Downloading dataset...")
-    r = requests.get(URL, stream=True)
-    z = zipfile.ZipFile(io.BytesIO(r.content))
-    z.extractall(DATA_PATH)
-
-    # Extract downloaded dataset
-    print("Extract UCI HAR Dataset...")
-    with zipfile.ZipFile(os.path.join(DATA_PATH, "UCI HAR Dataset.zip"), 'rb') as zip_ref:
-        zip_ref.extractall(DATA_PATH)
-
-# Loading UCI Har Dataset
-print("Loading UCI Har Dataset...")
-train_path = os.path.join(DATA_PATH, "UCI HAR Dataset", "train")
-test_path = os.path.join(DATA_PATH, "UCI HAR Dataset", "test")
-
-x_train = extract_features(os.path.join(train_path, "Inertial Signals"))
-y_train = np.loadtxt(os.path.join(train_path, "y_train.txt")) - 1
-
-x_test = extract_features(os.path.join(test_path, "Inertial Signals"))
-y_test = np.loadtxt(os.path.join(test_path, "y_test.txt")) - 1
-x_test, x_valid, y_test, y_valid = train_test_split(x_test, y_test, test_size=0.5, shuffle=True)
+HISTORY_PATH = os.path.join("results")
 
 # Making model folder
 if not os.path.isdir("model_data"):
@@ -50,7 +16,7 @@ if not os.path.isdir("model_data"):
     os.mkdir("model_data")
 
 callback = callbacks.ModelCheckpoint(
-    filepath=os.path.join("model_data", "best_smaller.keras"),
+    filepath=os.path.join("model_data", "500kb.keras"),
     monitor="val_accuracy",
     mode="max",
     save_best_only=True,
@@ -87,16 +53,16 @@ model = models.Sequential([
 
 model.summary()
 
-model = keras.models.load_model("model_data/best_smaller.keras")
-model.evaluate(x_train, y_train)
-quit()
-
 # Training the model
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
 history = model.fit(x_train, y_train, epochs=EPOCHS, batch_size=64, validation_data=(x_valid, y_valid), callbacks=callback)
+
 loss, acc = model.evaluate(x_test, y_test, verbose=1)
 print(f"Loss: {loss : .4f}\nAccuracy: {acc * 100 : .2f}%")
+
+# Saves model's history
+with open(os.join(HISTORY_PATH, "train_history"), 'wb') as f:
+    pickle.dump(history.history, f)
 
 # Plot model's accuracy and loss over epochs
 plt.subplot(1, 2, 1)

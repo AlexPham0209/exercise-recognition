@@ -1,3 +1,5 @@
-.venv
-dataset
-model_data
+.venv/
+data/
+model_data/
+results
+*.egg-info/
