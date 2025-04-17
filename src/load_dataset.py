@@ -2,7 +2,7 @@
 import os
 
 import numpy as np
-from src.dataset import DATA_PATH
+from src.download_dataset import DATA_PATH
 from sklearn.model_selection import train_test_split
 
 # Extracting features from the dataset

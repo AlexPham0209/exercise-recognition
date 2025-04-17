@@ -5,18 +5,18 @@ import keras
 from keras import layers, models, callbacks
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from src.features import *
+from src.load_dataset import *
 
-EPOCHS = 1000
+EPOCHS = 500
 HISTORY_PATH = os.path.join("results")
 
 # Making model folder
-if not os.path.isdir("model_data"):
+if not os.path.isdir("models"):
     print("Making save data folder")
-    os.mkdir("model_data")
+    os.mkdir("models")
 
 callback = callbacks.ModelCheckpoint(
-    filepath=os.path.join("model_data", "500kb.keras"),
+    filepath=os.path.join("models", "500kb.keras"),
     monitor="val_accuracy",
     mode="max",
     save_best_only=True,
@@ -61,7 +61,7 @@ loss, acc = model.evaluate(x_test, y_test, verbose=1)
 print(f"Loss: {loss : .4f}\nAccuracy: {acc * 100 : .2f}%")
 
 # Saves model's history
-with open(os.join(HISTORY_PATH, "train_history"), 'wb') as f:
+with open(os.path.join(HISTORY_PATH, "train_history"), 'wb') as f:
     pickle.dump(history.history, f)
 
 # Plot model's accuracy and loss over epochs
