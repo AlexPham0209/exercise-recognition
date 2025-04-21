@@ -16,7 +16,7 @@ if not os.path.isdir("models"):
     os.mkdir("models")
 
 callback = callbacks.ModelCheckpoint(
-    filepath=os.path.join("models", "500kb.keras"),
+    filepath=os.path.join("models", "300kb.keras"),
     monitor="val_accuracy",
     mode="max",
     save_best_only=True,
@@ -43,7 +43,7 @@ model = models.Sequential([
 
     layers.Flatten(),
 
-    layers.Dense(64),
+    layers.Dense(32),
     layers.BatchNormalization(),
     layers.ReLU(),
     layers.Dropout(rate=0.5),
