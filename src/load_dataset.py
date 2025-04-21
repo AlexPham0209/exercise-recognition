@@ -5,10 +5,14 @@ import numpy as np
 from src.download_dataset import DATA_PATH
 from sklearn.model_selection import train_test_split
 
+def normalize(x):
+    return (x + 1) / 2
+
 # Extracting features from the dataset
 def extract_features(path): 
     res = []
-    for name in os.listdir(path):
+    for name in os.listdir(path)[3:]:
+        print(name)
         feature = np.loadtxt(os.path.join(path, name))
         res.append(feature)
     
