@@ -44,7 +44,7 @@ limitations under the License.
 const float accelerationThreshold = 2.5; // threshold of significant in G's
 const int numSamples = 128;
 
-int samplesRead = numSamples;
+int samplesRead = 0;
 
 namespace {
   const tflite::Model* model = nullptr;
@@ -69,7 +69,7 @@ void printData(float aX, float aY, float aZ, float gX, float gY, float gZ) {
     Serial.print(gY, 3);
     Serial.print(',');
     Serial.print(gZ, 3);
-    Serial.println();
+    Serial.println(',');
 } 
 
 // array to map gesture index to a name
@@ -78,7 +78,7 @@ const char* GESTURES[] = {
   "WALKING",
   "WALKING_UPSTAIRS",
   "WALKING_DOWNSTAIRS",
-  "SITTING"
+  "SITTING",
   "STANDING",
   "LAYING"
 };
@@ -87,14 +87,19 @@ const char* GESTURES[] = {
 
 void setup() {
   tflite::InitializeTarget();
-
   Serial.begin(9600);
   while (!Serial);
+
 
   if (!IMU.begin()) {
     Serial.println("Failed to initialize IMU!");
     while (1);
   }
+
+  IMU.setAccelerationSampleRate(2);
+  IMU.setGyroscopeSampleRate(2);
+
+  IMU.gyroUnit = RADIANSPERSECOND;
 
   // print out the samples rates of the IMUs
   Serial.print("Accelerometer sample rate = ");
@@ -104,12 +109,21 @@ void setup() {
   Serial.print(IMU.gyroscopeSampleRate());
   Serial.println(" Hz");
 
+
   // get the TFL representation of the model byte array
   model = tflite::GetModel(g_model);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     Serial.println("Model provided is schema version not equal to supported version");
     return;
   }
+
+  // static tflite::MicroMutableOpResolver<7> microOpResolver;
+  // microOpResolver.AddConv2D();
+  // microOpResolver.AddExpandDims();
+  // microOpResolver.AddRelu();
+  // microOpResolver.AddFullyConnected();
+  // microOpResolver.AddSoftmax();
+  // microOpResolver.AddReshape();
 
   static tflite::AllOpsResolver resolver;
 
@@ -120,7 +134,10 @@ void setup() {
   // Allocate memory for the model's input and output tensors
   TfLiteStatus allocateStatus = interpreter->AllocateTensors();
   if (allocateStatus != kTfLiteOk) {
-    Serial.println("AllocateTensors() failed");
+    MicroPrintf(
+        "Model provided is schema version %d not equal "
+        "to supported version %d.",
+        model->version(), TFLITE_SCHEMA_VERSION);
     return;
   }
 
@@ -136,11 +153,12 @@ void loop() {
 
   // check if the all the required samples have been read since
   // the last time the significant motion was detected
-  for (int i = 0; i < numSamples; ++i) {
+  int count = 0;
+  while (samplesRead < numSamples) {
     // check if both new acceleration and gyroscope data is
     // available
     if (!IMU.accelerationAvailable() || !IMU.gyroscopeAvailable())
-      break;
+      continue;
 
     // read the acceleration and gyroscope data
     // Accelerometer data between [-4, 4]
@@ -148,31 +166,21 @@ void loop() {
     IMU.readAcceleration(aX, aY, aZ);
     IMU.readGyroscope(gX, gY, gZ);
 
-    // Normalizing data between [-1, 1]
-    aX /= 4;
-    aY /= 4;
-    aZ /= 4;
-
-    gX /= 2000;
-    gY /= 2000;
-    gZ /= 2000;
-
-    input->data.f[i * 6 + 0] = aX;
-    input->data.f[i * 6 + 1] = aY;
-    input->data.f[i * 6 + 2] = aZ;
-    input->data.f[i * 6 + 3] = gX;
-    input->data.f[i * 6 + 4] = gY;
-    input->data.f[i * 6 + 5] = gZ;
-
-    // printData(aX, aY, aZ, gX, gY, gZ);
+    // Normalizing data between [0, 1] and setting it to the input tensor
+    // Hawk Tuah!!
+    input->data.f[samplesRead * 6 + 0] = (gX + 2000.0) / 4000.0;
+    input->data.f[samplesRead * 6 + 1] = (gY + 2000.0) / 4000.0;
+    input->data.f[samplesRead * 6 + 2] = (gZ + 2000.0) / 4000.0;
+    input->data.f[samplesRead * 6 + 3] = (aX + 4.0) / 8.0;
+    input->data.f[samplesRead * 6 + 4] = (aX + 4.0) / 8.0;
+    input->data.f[samplesRead * 6 + 5] = (aY + 4.0) / 8.0;
     
+    
+    // printData(input->data.f[samplesRead * 6 + 0], input->data.f[samplesRead * 6 + 1], input->data.f[samplesRead * 6 + 2], input->data.f[samplesRead * 6 + 3], input->data.f[
+    // samplesRead * 6 + 4], input->data.f[samplesRead * 6 + 5]);
+    samplesRead++;
   }
 
-  Serial.println(input->dims->size);
-  Serial.println(input->dims->data[0]);
-  Serial.println(input->dims->data[1]);
-  Serial.println(input->dims->data[2]);
-  
   TfLiteStatus invokeStatus = interpreter->Invoke();
   if (invokeStatus != kTfLiteOk) {
     Serial.println("Invoke failed!");
@@ -180,12 +188,13 @@ void loop() {
     return;
   }
   
+  Serial.println();
   for (int i = 0; i < NUM_GESTURES; i++) {
-          Serial.print(GESTURES[i]);
-          Serial.print(": ");
-          Serial.println(output->data.f[i], 6);
+    Serial.print(GESTURES[i]);
+    Serial.print(": ");
+    Serial.println(output->data.f[i]);
   }
 
-  Serial.println();
+  samplesRead = 0;
 }
 

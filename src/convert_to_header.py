@@ -9,7 +9,8 @@ def convert_tflite_to_header(tflite_path, output_header_path):
     hex_array = ',\n  '.join(hex_lines)
 
     with open(output_header_path, 'w') as header_file:
-        header_file.write('alignas(8) const unsigned char g_model[] = {\n  ')
+        header_file.write('#include "model.h"\n\n')
+        header_file.write('alignas(16) const unsigned char g_model[] = {\n  ')
         header_file.write(f'{hex_array}\n')
         header_file.write('};\n\n')
         header_file.write(f'const int g_model_len = {len(hex_lines) * 12};')
@@ -17,6 +18,6 @@ def convert_tflite_to_header(tflite_path, output_header_path):
 if __name__ == "__main__":
     tflite_path = 'models/350kb.tflite'
     output_header_path = 'models/model.h'
-
+    
     convert_tflite_to_header(tflite_path, output_header_path)
     convert_tflite_to_header(tflite_path, output_header_path)

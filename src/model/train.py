@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from src.load_dataset import *
 
-EPOCHS = 500
+EPOCHS = 100
 HISTORY_PATH = os.path.join("results")
 
 # Making model folder
@@ -16,7 +16,7 @@ if not os.path.isdir("models"):
     os.mkdir("models")
 
 callback = callbacks.ModelCheckpoint(
-    filepath=os.path.join("models", "300kb.keras"),
+    filepath=os.path.join("models", "350kb.keras"),
     monitor="val_accuracy",
     mode="max",
     save_best_only=True,

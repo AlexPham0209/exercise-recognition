@@ -4,19 +4,18 @@ import os
 import numpy as np
 from src.download_dataset import DATA_PATH
 from sklearn.model_selection import train_test_split
-
-def normalize(x):
-    return (x + 1) / 2
+from sklearn.preprocessing import minmax_scale
 
 # Extracting features from the dataset
 def extract_features(path): 
     res = []
     for name in os.listdir(path)[3:]:
-        print(name)
         feature = np.loadtxt(os.path.join(path, name))
         res.append(feature)
-    
-    return np.stack(res, axis=-1)
+            
+    res = np.stack(res, axis=-1)
+    res = (res - res.min(axis=2, keepdims=True))/(res.max(axis=2, keepdims=True) - res.min(axis=2, keepdims=True))
+    return res
 
 print("Loading UCI Har Dataset...")
 train_path = os.path.join(DATA_PATH, "UCI HAR Dataset", "train")
