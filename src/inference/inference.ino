@@ -85,6 +85,30 @@ const char* GESTURES[] = {
 
 #define NUM_GESTURES (sizeof(GESTURES) / sizeof(GESTURES[0]))
 
+float calculateMax(float arr[]) {
+  float res = arr[0];
+  int length = sizeof(arr) / sizeof(arr[0]);
+
+  for (int i = 0; i < sizeof(arr); ++i) 
+    res = max(res, arr[i]);
+
+  return res;
+}
+
+float calculateMin(float arr[]) {
+  float res = arr[0];
+  int length = sizeof(arr) / sizeof(arr[0]);
+
+  for (int i = 0; i < sizeof(arr); ++i) 
+    res = min(res, arr[i]);
+
+  return res;
+}
+
+float scale(float val, float min, float max) {
+  return (val - min) / (max - min);
+}
+
 void setup() {
   tflite::InitializeTarget();
   Serial.begin(9600);
@@ -166,14 +190,18 @@ void loop() {
     IMU.readAcceleration(aX, aY, aZ);
     IMU.readGyroscope(gX, gY, gZ);
 
+    float vals[6] = {gX, gY, gZ, aX, aY, aZ};
+    float minVal = calculateMin(vals);
+    float maxVal = calculateMax(vals);
+    
     // Normalizing data between [0, 1] and setting it to the input tensor
     // Hawk Tuah!!
-    input->data.f[samplesRead * 6 + 0] = (gX + 2000.0) / 4000.0;
-    input->data.f[samplesRead * 6 + 1] = (gY + 2000.0) / 4000.0;
-    input->data.f[samplesRead * 6 + 2] = (gZ + 2000.0) / 4000.0;
-    input->data.f[samplesRead * 6 + 3] = (aX + 4.0) / 8.0;
-    input->data.f[samplesRead * 6 + 4] = (aX + 4.0) / 8.0;
-    input->data.f[samplesRead * 6 + 5] = (aY + 4.0) / 8.0;
+    input->data.f[samplesRead * 6 + 0] = scale(gX, minVal, maxVal);
+    input->data.f[samplesRead * 6 + 1] = scale(gY, minVal, maxVal);
+    input->data.f[samplesRead * 6 + 2] = scale(gZ, minVal, maxVal);
+    input->data.f[samplesRead * 6 + 3] = scale(aX, minVal, maxVal);
+    input->data.f[samplesRead * 6 + 4] = scale(aY, minVal, maxVal);
+    input->data.f[samplesRead * 6 + 5] = scale(aZ, minVal, maxVal);
     
     
     // printData(input->data.f[samplesRead * 6 + 0], input->data.f[samplesRead * 6 + 1], input->data.f[samplesRead * 6 + 2], input->data.f[samplesRead * 6 + 3], input->data.f[
