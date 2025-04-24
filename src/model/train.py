@@ -5,9 +5,9 @@ import keras
 from keras import layers, models, callbacks
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from src.load_dataset import *
+from src.load_custom_dataset import *
 
-EPOCHS = 100
+EPOCHS = 500
 HISTORY_PATH = os.path.join("results")
 
 # Making model folder
@@ -17,8 +17,8 @@ if not os.path.isdir("models"):
 
 callback = callbacks.ModelCheckpoint(
     filepath=os.path.join("models", "350kb.keras"),
-    monitor="val_accuracy",
-    mode="max",
+    monitor="val_loss",
+    mode="min",
     save_best_only=True,
     verbose=1
 )
@@ -48,14 +48,14 @@ model = models.Sequential([
     layers.ReLU(),
     layers.Dropout(rate=0.5),
 
-    layers.Dense(6, activation="softmax")
+    layers.Dense(label, activation="softmax")
 ])
 
 model.summary()
 
 # Training the model
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-history = model.fit(x_train, y_train, epochs=EPOCHS, batch_size=64, validation_data=(x_valid, y_valid), callbacks=callback)
+history = model.fit(x_train, y_train, epochs=EPOCHS, batch_size=64, validation_data=(x_test, y_test), callbacks=callback)
 
 loss, acc = model.evaluate(x_test, y_test, verbose=1)
 print(f"Loss: {loss : .4f}\nAccuracy: {acc * 100 : .2f}%")

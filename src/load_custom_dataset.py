@@ -1,6 +1,6 @@
 import os
-import numpy as np 
-
+import numpy as np
+from sklearn.model_selection import train_test_split
 PATH = os.path.join('data', 'workout')
 features = []
 labels = []
@@ -28,9 +28,5 @@ for folder in os.listdir(PATH):
 
 features = np.concatenate(features, axis=0)
 labels = np.array(labels)
-print(labels.shape)
-print(features.shape)
 
-print(labels[74 * 2])
-print(features[74 * 2])
-
+x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.33, random_state=42)

@@ -32,12 +32,12 @@ void setup() {
   }
 
   // print out the samples rates of the IMUs
-  Serial.print("Accelerometer sample rate = ");
-  Serial.print(IMU.accelerationSampleRate());
-  Serial.println(" Hz");
-  Serial.print("Gyroscope sample rate = ");
-  Serial.print(IMU.gyroscopeSampleRate());
-  Serial.println(" Hz");
+  // Serial.print("Accelerometer sample rate = ");
+  // Serial.print(IMU.accelerationSampleRate());
+  // Serial.println(" Hz");
+  // Serial.print("Gyroscope sample rate = ");
+  // Serial.print(IMU.gyroscopeSampleRate());
+  // Serial.println(" Hz");
 }
 
 void loop() {

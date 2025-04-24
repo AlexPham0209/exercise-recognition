@@ -41,7 +41,7 @@ limitations under the License.
 #include "tensorflow/lite/schema/schema_generated.h"
 #include <Arduino_LSM9DS1.h>
 
-const float accelerationThreshold = 2.35; // threshold of significant in G's
+const float accelerationThreshold = 2.0; // threshold of significant in G's
 const int numSamples = 238;
 
 int samplesRead = 0;
@@ -52,7 +52,7 @@ namespace {
   TfLiteTensor* input = nullptr;
   TfLiteTensor* output = nullptr;
 
-  constexpr int tensorArenaSize = 50000;
+  constexpr int tensorArenaSize = 64000;
   alignas(16) uint8_t tensorArena[tensorArenaSize];
 }  // namespace
 
@@ -108,14 +108,6 @@ void setup() {
     Serial.println("Model provided is schema version not equal to supported version");
     return;
   }
-
-  // static tflite::MicroMutableOpResolver<7> microOpResolver;
-  // microOpResolver.AddConv2D();
-  // microOpResolver.AddExpandDims();
-  // microOpResolver.AddRelu();
-  // microOpResolver.AddFullyConnected();
-  // microOpResolver.AddSoftmax();
-  // microOpResolver.AddReshape();
 
   static tflite::AllOpsResolver resolver;
 
@@ -197,13 +189,24 @@ void loop() {
     return;
   }
   
-  Serial.println();
-  for (int i = 0; i < NUM_GESTURES; i++) {
-    Serial.print(GESTURES[i]);
-    Serial.print(": ");
-    Serial.println(output->data.f[i]);
+  float val = -1000;
+  int index = 0;
+  
+  for (int i = 0; i < NUM_GESTURES; ++i) {
+    float out = output->data.f[i];
+    if (out >= val) {
+      val = max(val, out);
+      index = i;
+    }
   }
 
-  samplesRead = 0;
+  Serial.println(GESTURES[index]);
+
+  // for (int i = 0; i < NUM_GESTURES; i++) {
+  //   Serial.print(GESTURES[i]);
+  //   Serial.print(": ");
+  //   Serial.println(output->data.f[i]);
+  // }
+
 }
 
