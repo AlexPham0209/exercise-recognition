@@ -41,8 +41,8 @@ limitations under the License.
 #include "tensorflow/lite/schema/schema_generated.h"
 #include <Arduino_LSM9DS1.h>
 
-const float accelerationThreshold = 2.5; // threshold of significant in G's
-const int numSamples = 128;
+const float accelerationThreshold = 2.35; // threshold of significant in G's
+const int numSamples = 238;
 
 int samplesRead = 0;
 
@@ -75,39 +75,12 @@ void printData(float aX, float aY, float aZ, float gX, float gY, float gZ) {
 // array to map gesture index to a name
 
 const char* GESTURES[] = {
-  "WALKING",
-  "WALKING_UPSTAIRS",
-  "WALKING_DOWNSTAIRS",
-  "SITTING",
-  "STANDING",
-  "LAYING"
+  "CURL",
+  "PRESS",
+  "RAISE",
 };
 
 #define NUM_GESTURES (sizeof(GESTURES) / sizeof(GESTURES[0]))
-
-float calculateMax(float arr[]) {
-  float res = arr[0];
-  int length = sizeof(arr) / sizeof(arr[0]);
-
-  for (int i = 0; i < sizeof(arr); ++i) 
-    res = max(res, arr[i]);
-
-  return res;
-}
-
-float calculateMin(float arr[]) {
-  float res = arr[0];
-  int length = sizeof(arr) / sizeof(arr[0]);
-
-  for (int i = 0; i < sizeof(arr); ++i) 
-    res = min(res, arr[i]);
-
-  return res;
-}
-
-float scale(float val, float min, float max) {
-  return (val - min) / (max - min);
-}
 
 void setup() {
   tflite::InitializeTarget();
@@ -119,11 +92,6 @@ void setup() {
     Serial.println("Failed to initialize IMU!");
     while (1);
   }
-
-  IMU.setAccelerationSampleRate(2);
-  IMU.setGyroscopeSampleRate(2);
-
-  IMU.gyroUnit = RADIANSPERSECOND;
 
   // print out the samples rates of the IMUs
   Serial.print("Accelerometer sample rate = ");
@@ -175,6 +143,23 @@ void setup() {
 void loop() {
   float aX, aY, aZ, gX, gY, gZ;
 
+  while (samplesRead == numSamples) {
+    if (IMU.accelerationAvailable()) {
+      // read the acceleration data
+      IMU.readAcceleration(aX, aY, aZ);
+
+      // sum up the absolutes
+      float aSum = fabs(aX) + fabs(aY) + fabs(aZ);
+
+      // check if it's above the threshold
+      if (aSum >= accelerationThreshold) {
+        // reset the sample read count
+        samplesRead = 0;
+        break;
+      }
+    }
+  }
+
   // check if the all the required samples have been read since
   // the last time the significant motion was detected
   int count = 0;
@@ -190,18 +175,14 @@ void loop() {
     IMU.readAcceleration(aX, aY, aZ);
     IMU.readGyroscope(gX, gY, gZ);
 
-    float vals[6] = {gX, gY, gZ, aX, aY, aZ};
-    float minVal = calculateMin(vals);
-    float maxVal = calculateMax(vals);
-    
     // Normalizing data between [0, 1] and setting it to the input tensor
     // Hawk Tuah!!
-    input->data.f[samplesRead * 6 + 0] = scale(gX, minVal, maxVal);
-    input->data.f[samplesRead * 6 + 1] = scale(gY, minVal, maxVal);
-    input->data.f[samplesRead * 6 + 2] = scale(gZ, minVal, maxVal);
-    input->data.f[samplesRead * 6 + 3] = scale(aX, minVal, maxVal);
-    input->data.f[samplesRead * 6 + 4] = scale(aY, minVal, maxVal);
-    input->data.f[samplesRead * 6 + 5] = scale(aZ, minVal, maxVal);
+    input->data.f[samplesRead * 6 + 0] = (aX + 4.0) / 8.0;
+    input->data.f[samplesRead * 6 + 1] = (aY + 4.0) / 8.0;
+    input->data.f[samplesRead * 6 + 2] = (aZ + 4.0) / 8.0;
+    input->data.f[samplesRead * 6 + 3] = (gX + 2000.0) / 4000.0;
+    input->data.f[samplesRead * 6 + 4] = (gY + 2000.0) / 4000.0;
+    input->data.f[samplesRead * 6 + 5] = (gZ + 2000.0) / 4000.0;
     
     
     // printData(input->data.f[samplesRead * 6 + 0], input->data.f[samplesRead * 6 + 1], input->data.f[samplesRead * 6 + 2], input->data.f[samplesRead * 6 + 3], input->data.f[

@@ -1,8 +1,9 @@
 #include <Arduino_LSM9DS1.h>
 
-const float accelerationThreshold = 2.0;
+const float accelerationThreshold = 2.35;
+int SAMPLES = 300;
 int samplesRead = 0;
-int numSamples = 119;
+int numSamples = 238;
 
 void printData(float aX, float aY, float aZ, float gX, float gY, float gZ) {
   //print the data in CSV format
@@ -41,6 +42,7 @@ void setup() {
 
 void loop() {
   float aX, aY, aZ, gX, gY, gZ;
+  while (SAMPLES <= 0);
 
   // check if the all the required samples have been read since
   // the last time the significant motion was detected
@@ -86,5 +88,6 @@ void loop() {
     samplesRead++;
   }
   Serial.println();
+  SAMPLES--;
 }
 

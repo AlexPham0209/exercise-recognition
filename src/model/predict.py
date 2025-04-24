@@ -1,6 +1,7 @@
 import os
 import keras
 import numpy as np
+import tensorflow as tf
 
 MODEL_PATH = "models"
 
@@ -137,5 +138,23 @@ arr = np.array([
 
 arr = arr.reshape((1, 128, 6))
 
-model = keras.models.load_model(os.path.join(MODEL_PATH, "350kb.keras"))
-print(model.predict(arr))
+# Load TFLite model and allocate tensors.
+interpreter = tf.lite.Interpreter(model_path=os.path.join(MODEL_PATH, "350kb.tflite"))
+interpreter.allocate_tensors()
+
+# Get input and output tensors.
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+print(input_details)
+
+# Test model on random input data.
+input_shape = input_details[0]['shape']
+interpreter.set_tensor(input_details[0]['index'], np.float32(arr))
+
+interpreter.invoke()
+
+# The function `get_tensor()` returns a copy of the tensor data.
+# Use `tensor()` in order to get a pointer to the tensor.
+output_data = interpreter.get_tensor(output_details[0]['index'])
+print(output_data)
