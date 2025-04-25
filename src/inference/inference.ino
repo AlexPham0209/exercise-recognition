@@ -41,7 +41,7 @@ limitations under the License.
 #include "tensorflow/lite/schema/schema_generated.h"
 #include <Arduino_LSM9DS1.h>
 
-const float accelerationThreshold = 2.0; // threshold of significant in G's
+const float accelerationThreshold = 2.25; // threshold of significant in G's
 const int numSamples = 238;
 
 int samplesRead = 0;
@@ -56,23 +56,6 @@ namespace {
   alignas(16) uint8_t tensorArena[tensorArenaSize];
 }  // namespace
 
-void printData(float aX, float aY, float aZ, float gX, float gY, float gZ) {
-  //print the data in CSV format
-    Serial.print(aX, 3);
-    Serial.print(',');
-    Serial.print(aY, 3);
-    Serial.print(',');
-    Serial.print(aZ, 3);
-    Serial.print(',');
-    Serial.print(gX, 3);
-    Serial.print(',');
-    Serial.print(gY, 3);
-    Serial.print(',');
-    Serial.print(gZ, 3);
-    Serial.println(',');
-} 
-
-// array to map gesture index to a name
 
 const char* GESTURES[] = {
   "CURL",
@@ -128,36 +111,23 @@ void setup() {
   // Get pointers for the model's input and output tensors
   input = interpreter->input(0);
   output = interpreter->output(0);
-
-  
 }
 
 void loop() {
   float aX, aY, aZ, gX, gY, gZ;
 
-  while (samplesRead == numSamples) {
-    if (IMU.accelerationAvailable()) {
-      // read the acceleration data
-      IMU.readAcceleration(aX, aY, aZ);
-
-      // sum up the absolutes
-      float aSum = fabs(aX) + fabs(aY) + fabs(aZ);
-
-      // check if it's above the threshold
-      if (aSum >= accelerationThreshold) {
-        // reset the sample read count
-        samplesRead = 0;
-        break;
-      }
-    }
+  float aSum = 0;
+  while (aSum < accelerationThreshold) {
+    if (!IMU.accelerationAvailable())
+      continue;
+    
+    IMU.readAcceleration(aX, aY, aZ);
+    aSum = fabs(aX) + fabs(aY) + fabs(aZ);
   }
 
-  // check if the all the required samples have been read since
-  // the last time the significant motion was detected
-  int count = 0;
+  samplesRead = 0;
   while (samplesRead < numSamples) {
-    // check if both new acceleration and gyroscope data is
-    // available
+    // Check if both new acceleration and gyroscope data are available
     if (!IMU.accelerationAvailable() || !IMU.gyroscopeAvailable())
       continue;
 
@@ -176,12 +146,10 @@ void loop() {
     input->data.f[samplesRead * 6 + 4] = (gY + 2000.0) / 4000.0;
     input->data.f[samplesRead * 6 + 5] = (gZ + 2000.0) / 4000.0;
     
-    
-    // printData(input->data.f[samplesRead * 6 + 0], input->data.f[samplesRead * 6 + 1], input->data.f[samplesRead * 6 + 2], input->data.f[samplesRead * 6 + 3], input->data.f[
-    // samplesRead * 6 + 4], input->data.f[samplesRead * 6 + 5]);
     samplesRead++;
   }
 
+  // Runs the 1D Convolutional model
   TfLiteStatus invokeStatus = interpreter->Invoke();
   if (invokeStatus != kTfLiteOk) {
     Serial.println("Invoke failed!");
@@ -189,9 +157,39 @@ void loop() {
     return;
   }
   
+  // Print most likely exercise
+  int index = argmax();
+  Serial.println(GESTURES[index]);
+  
+  // Print probability of each feature in the output vector 
+  for (int i = 0; i < NUM_GESTURES; i++) {
+    Serial.print(GESTURES[i]);
+    Serial.print(": ");
+    Serial.println(output->data.f[i]);
+  }
+  Serial.println();
+}
+
+void printData(float aX, float aY, float aZ, float gX, float gY, float gZ) {
+  //print the data in CSV format
+    Serial.print(aX, 3);
+    Serial.print(',');
+    Serial.print(aY, 3);
+    Serial.print(',');
+    Serial.print(aZ, 3);
+    Serial.print(',');
+    Serial.print(gX, 3);
+    Serial.print(',');
+    Serial.print(gY, 3);
+    Serial.print(',');
+    Serial.print(gZ, 3);
+    Serial.println(',');
+} 
+
+float argmax() {
   float val = -1000;
   int index = 0;
-  
+
   for (int i = 0; i < NUM_GESTURES; ++i) {
     float out = output->data.f[i];
     if (out >= val) {
@@ -200,13 +198,6 @@ void loop() {
     }
   }
 
-  Serial.println(GESTURES[index]);
-
-  // for (int i = 0; i < NUM_GESTURES; i++) {
-  //   Serial.print(GESTURES[i]);
-  //   Serial.print(": ");
-  //   Serial.println(output->data.f[i]);
-  // }
-
+  return index;
 }
 

@@ -1,6 +1,6 @@
 #include <Arduino_LSM9DS1.h>
 
-const float accelerationThreshold = 2.35;
+const float accelerationThreshold = 2.25;
 int SAMPLES = 300;
 int samplesRead = 0;
 int numSamples = 238;

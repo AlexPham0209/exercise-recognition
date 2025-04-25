@@ -17,6 +17,7 @@ for folder in os.listdir(PATH):
         sample_path = os.path.join(samples, file)
         sample = np.loadtxt(sample_path).reshape((-1, 238, 6))
         res.append(sample)
+
     
     if len(res) <= 0:
         continue
@@ -29,4 +30,4 @@ for folder in os.listdir(PATH):
 features = np.concatenate(features, axis=0)
 labels = np.array(labels)
 
-x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.33, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.3, random_state=42)
