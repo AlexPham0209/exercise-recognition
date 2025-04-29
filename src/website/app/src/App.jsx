@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import { socket } from './socket'
 import './App.css'
 import BarChart from './components/BarChart'
+import Information from './components/Information'
 
 function App() {
   const [data, setData] = useState({'name': 'NONE', 'probability': [0, 0, 0]});
@@ -59,6 +60,7 @@ function App() {
 
   return (
     <div>
+      <Information curl={curl} press={press} raise={raise}></Information>
       <BarChart probabilities={data['probability']}></BarChart>
     </div>
   )

@@ -9,6 +9,12 @@ export default function BarChart({probabilities}) {
         labels: ["Curl", "Press", "Raise"],
         datasets: [{
             label: "Probability",
+            backgroundColor: [
+                "rgba(43, 63, 229, 0.8)",
+                "rgba(250, 192, 19, 0.8)",
+                "rgba(253, 135, 135, 0.8)",
+            ],
+            borderRadius: 5,
             data: probabilities
         }]
     } 
@@ -18,13 +24,15 @@ export default function BarChart({probabilities}) {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-            y: { beginAtZero: true }
+            y: { beginAtZero: true, 
+                suggestedMax: 1.0
+            }
         }
     }
 
-  return (
-    <Card>
-        <Bar data={data}></Bar>
-    </Card>
-  );
+    return (
+        <Card>
+            <Bar data={data} options={options} width="500px" height="250px"></Bar>
+        </Card>
+    );
 }
