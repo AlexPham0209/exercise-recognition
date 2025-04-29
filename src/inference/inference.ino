@@ -77,12 +77,12 @@ void setup() {
   }
 
   // print out the samples rates of the IMUs
-  Serial.print("Accelerometer sample rate = ");
-  Serial.print(IMU.accelerationSampleRate());
-  Serial.println(" Hz");
-  Serial.print("Gyroscope sample rate = ");
-  Serial.print(IMU.gyroscopeSampleRate());
-  Serial.println(" Hz");
+  // Serial.print("Accelerometer sample rate = ");
+  // Serial.print(IMU.accelerationSampleRate());
+  // Serial.println(" Hz");
+  // Serial.print("Gyroscope sample rate = ");
+  // Serial.print(IMU.gyroscopeSampleRate());
+  // Serial.println(" Hz");
 
 
   // get the TFL representation of the model byte array
@@ -159,14 +159,15 @@ void loop() {
   
   // Print most likely exercise
   int index = argmax();
-  Serial.println(GESTURES[index]);
+  Serial.print(GESTURES[index]);
+  Serial.print(",");
   
   // Print probability of each feature in the output vector 
-  for (int i = 0; i < NUM_GESTURES; i++) {
-    Serial.print(GESTURES[i]);
-    Serial.print(": ");
-    Serial.println(output->data.f[i]);
+  for (int i = 0; i < NUM_GESTURES - 1; i++) {
+    Serial.print(output->data.f[i]);
+    Serial.print(",");
   }
+  Serial.print(output->data.f[NUM_GESTURES - 1]);
   Serial.println();
 }
 
