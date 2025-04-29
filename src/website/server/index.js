@@ -43,9 +43,6 @@ parser.on('data', data => {
   const name = param[0];
   const probability = param.slice(1).map((x) => parseFloat(x));
 
-  console.log(name);
-  console.log(probability);
-
   io.emit('data', {"name": name, "probability": probability});
 });
 

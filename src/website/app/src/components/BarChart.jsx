@@ -1,10 +1,11 @@
 import { Bar } from "react-chartjs-2"
 import { Chart as ChartJS, CategoryScale, Tooltip, Legend, LinearScale, BarElement} from "chart.js";
+import Card from "./Card";
 ChartJS.register(CategoryScale, LinearScale, Tooltip, Legend, BarElement);
 
-export default function BarChart({ probabilities }) {
+export default function BarChart({probabilities}) {
     // Define the data structure
-    const dataset = {
+    const data = {
         labels: ["Curl", "Press", "Raise"],
         datasets: [{
             label: "Probability",
@@ -22,6 +23,8 @@ export default function BarChart({ probabilities }) {
     }
 
   return (
-    <Bar data={dataset}></Bar>
+    <Card>
+        <Bar data={data}></Bar>
+    </Card>
   );
 }
