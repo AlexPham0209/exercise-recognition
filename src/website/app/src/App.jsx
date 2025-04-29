@@ -3,17 +3,19 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { socket } from './socket'
 import './App.css'
+import BarChart from './components/BarChart'
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [data, setData] = useState({'name': 'NONE', 'probability': [0, 0, 0]});
 
-  const [data, setData] = useState({});
+  // Initialize exercise repetition count as state variables
   const [curl, setCurl] = useState(0);
   const [press, setPress] = useState(0);
   const [raise, setRaise] = useState(0);
   
   const [isConnected, setIsConnected] = useState(socket.connected);
   
+  // Establishes events for socket
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
@@ -38,6 +40,7 @@ function App() {
     };
   });
 
+  // Runs if Arduino data has changed
   useEffect(() => {
     switch (data['name']) {
       case "CURL":
@@ -53,15 +56,11 @@ function App() {
         break;
     }
   }, [data]);
-  
-  console.log(curl);
-  console.log(press);
-  console.log(raise + "\n\n");
 
   return (
-    <>
-      
-    </>
+    <div>
+      <BarChart probabilities={data['probability']}></BarChart>
+    </div>
   )
 }
 
