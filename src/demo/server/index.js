@@ -13,7 +13,7 @@ const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 2904;
 
-app.use(express.static(path.join(__dirname, 'src/website/app/dist')));
+app.use(express.static(path.join(__dirname, 'src/demo/app/dist')));
 
 // Establish websocket connection
 const io = new Server(server);
