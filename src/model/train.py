@@ -5,7 +5,7 @@ import keras
 from keras import layers, models, callbacks
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from src.dataset.load_custom_dataset import *
+from dataset.load_custom_dataset import *
 
 EPOCHS = 500
 HISTORY_PATH = os.path.join("results")

@@ -5,61 +5,44 @@ import BarChart from './components/BarChart'
 import Information from './components/Information'
 
 function App() {
-  const [data, setData] = useState({'name': 'NONE', 'probability': [0, 0, 0]});
+  const [probability, setProbability] = useState([0, 0, 0]);
 
   // Initialize exercise repetition count as state variables
   const [curl, setCurl] = useState(0);
   const [press, setPress] = useState(0);
   const [raise, setRaise] = useState(0);
   
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  
   // Establishes events for socket
   useEffect(() => {
-    function onConnect() {
-      setIsConnected(true);
-    }
-
-    function onDisconnect() {
-      setIsConnected(false);
-    }
-
     function onDataEvent(value) {
-      setData(value);
+      setProbability(value['probability']);
+
+      switch (value['name']) {
+        case "CURL":
+          setCurl(current => current + 1);
+          break;
+    
+        case "PRESS":
+          setPress(current => current + 1);
+          break;
+        
+        case "RAISE":
+          setRaise(current => current + 1);
+          break;
+      }
     }
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
     socket.on('data', onDataEvent);
-
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
       socket.off('data', onDataEvent);
     };
   });
 
-  // Runs if Arduino data has changed
-  useEffect(() => {
-    switch (data['name']) {
-      case "CURL":
-        setCurl(current => current + 1);
-        break;
-  
-      case "PRESS":
-        setPress(current => current + 1);
-        break;
-      
-      case "RAISE":
-        setRaise(current => current + 1);
-        break;
-    }
-  }, [data]);
-
   return (
     <div>
+      <h1 style={{display: 'block', textAlign: 'center', marginBottom: '1.5em', fontSize: '2.5em'}}>Exercise Motion Detector 💪</h1>
       <Information curl={curl} press={press} raise={raise}></Information>
-      <BarChart probabilities={data['probability']}></BarChart>
+      <BarChart probabilities={probability}></BarChart>
     </div>
   )
 }

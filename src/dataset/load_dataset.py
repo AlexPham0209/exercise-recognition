@@ -2,7 +2,7 @@
 import os
 
 import numpy as np
-from src.download_dataset import DATA_PATH
+from dataset.download_dataset import DATA_PATH
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import minmax_scale
 
