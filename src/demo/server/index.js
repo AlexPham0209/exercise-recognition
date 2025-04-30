@@ -23,12 +23,11 @@ const serial = new SerialPort({ path: serialPort, baudRate: 9600 });
 const parser = serial.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
 app.get('/', (req, res) => {
-    res.status(200).send("Hello");
+    res.status(200).send("Good");
 });
 
 io.on('connection', (socket) => {
   console.log('A user connected');
-  io.emit('start', "You connected to server");
 });
 
 serial.on("open", () => {

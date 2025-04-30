@@ -18,7 +18,6 @@ for folder in os.listdir(PATH):
         sample = np.loadtxt(sample_path).reshape((-1, 238, 6))
         res.append(sample)
 
-    
     if len(res) <= 0:
         continue
     

@@ -20,4 +20,3 @@ if __name__ == "__main__":
     output_header_path = 'models/model.cpp'
     
     convert_tflite_to_header(tflite_path, output_header_path)
-    convert_tflite_to_header(tflite_path, output_header_path)

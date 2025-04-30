@@ -63,7 +63,7 @@ void loop() {
       }
     }
   }
-
+  
   while (samplesRead < numSamples) {
     // check if both new acceleration and gyroscope data is
     // available
