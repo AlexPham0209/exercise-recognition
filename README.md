@@ -7,4 +7,6 @@ This project requires a microcontroller with a LSM9DS1 IMU unit.
 - Run npm install in the [app](demo/app) and [server](demo/server) folder respectively.  
 - Load [inference.ino](src/inference/inference.ino) into your microcontroller
 - Check the COM port your micro controller uses
-- Change serialPort inside of index.js 
+- Change [serialPort variable](demo/server/index.js) to the COM port your microcontroller uses
+- Run in [index.js](demo/server/index.js)
+- Go to localhost:2904
