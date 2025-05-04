@@ -138,7 +138,6 @@ void loop() {
     IMU.readGyroscope(gX, gY, gZ);
 
     // Normalizing data between [0, 1] and setting it to the input tensor
-    // Hawk Tuah!!
     input->data.f[samplesRead * 6 + 0] = (aX + 4.0) / 8.0;
     input->data.f[samplesRead * 6 + 1] = (aY + 4.0) / 8.0;
     input->data.f[samplesRead * 6 + 2] = (aZ + 4.0) / 8.0;
