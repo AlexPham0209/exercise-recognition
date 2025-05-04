@@ -3,6 +3,7 @@ A machine learning project that classifies the current exercise you are doing an
 
 This project requires a microcontroller with a LSM9DS1 IMU unit. 
 
+![Website Demo](screenshots/demo.png)
 ## Installation
 - Run npm install in the [app](demo/app) and [server](demo/server) folder respectively.  
 - Load [inference.ino](src/inference/inference.ino) into your microcontroller
